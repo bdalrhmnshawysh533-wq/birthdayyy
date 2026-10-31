@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎂 عيد ميلاد سعيد لولتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'Cairo',Tahoma,sans-serif;color:#fff;
+ background:radial-gradient(ellipse at 50% 120%,#5b1456 0%,#1b0b3a 50%,#070314 100%);
+ display:flex;align-items:center;justify-content:center;text-align:center}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:1}
+.heart{position:fixed;bottom:-40px;z-index:0;opacity:.7;animation:up linear forwards;pointer-events:none}
+@keyframes up{to{transform:translateY(-115vh) rotate(40deg);opacity:0}}
+.stage{position:relative;z-index:2;padding:20px;max-width:620px;width:100%;margin:auto}
+.hidden{display:none!important}
+h1{font-size:clamp(1.8rem,6vw,3.2rem);font-weight:900;
+ background:linear-gradient(90deg,#ff7eb3,#ffd86f,#7efcff,#ff7eb3);background-size:300%;
+ -webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 5s linear infinite}
+@keyframes flow{to{background-position:300%}}
+.sub{margin:10px 0 20px;opacity:.85}
+.gift{font-size:90px;cursor:pointer;display:inline-block;animation:shake 1.6s infinite;
+ filter:drop-shadow(0 0 25px #ff4fa3)}
+@keyframes shake{0%,100%{transform:rotate(0)}10%{transform:rotate(-10deg) scale(1.1)}20%{transform:rotate(10deg) scale(1.1)}30%{transform:rotate(-6deg)}40%{transform:rotate(6deg)}50%{transform:rotate(0)}}
+.card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);
+ border-radius:24px;padding:20px;margin-top:15px;box-shadow:0 0 40px rgba(255,79,163,.3)}
+#letter{white-space:pre-wrap;line-height:1.8;font-size:1.05rem;min-height:120px}
+.cake{font-size:70px;margin-top:10px}
+.candles{display:flex;justify-content:center;gap:14px;margin-bottom:-6px;height:50px;align-items:flex-end}
+.candle{width:10px;height:30px;background:linear-gradient(#fff,#ffb3d9);border-radius:3px;position:relative}
+.flame{position:absolute;top:-18px;left:50%;width:12px;height:18px;transform:translateX(-50%);
+ background:radial-gradient(#fff 10%,#ffd86f 40%,#ff7a18 80%);border-radius:50%;
+ animation:fl .25s infinite alternate;box-shadow:0 0 15px #ffb347}
+.out .flame{opacity:0;transition:.6s}
+@keyframes fl{to{transform:translateX(-50%) scale(1.15,.9) rotate(4deg)}}
+button{font-family:inherit;font-size:1rem;font-weight:700;border:0;cursor:pointer;color:#fff;margin-top:15px;
+ padding:10px 25px;border-radius:50px;background:linear-gradient(90deg,#ff4fa3,#a259ff);
+ box-shadow:0 8px 25px rgba(255,79,163,.45);transition:.2s}
+button:hover{transform:scale(1.07)}
+.reasons li{list-style:none;margin:8px 0;opacity:0;transform:translateY(15px);transition:.7s;font-size:1rem}
+.reasons li.show{opacity:1;transform:none}
+.sign{margin-top:15px;font-weight:700;color:#ffd86f}
+
+/* زرار الهروب الذكي */
+#runaway-btn {
+    background: linear-gradient(90deg, #ff4fa3, #ff2a6d);
+    position: relative;
+    transition: 0.15s ease-out;
+}
+.btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+    height: 60px;
+}
+</style>
+</head>
+<body>
+
+<!-- الأغنية في الخلفية -->
+<audio id="bg-music" loop>
+  <source src="song.mp3" type="audio/mp3">
+</audio>
+
+<canvas id="fx"></canvas>
+
+<div class="stage" id="s1">
+  <h1 id="t1"></h1>
+  <p class="sub">في مفاجأة مجنونة مستنياكي.. دوسي على الهدية 👇</p>
+  <div class="gift" id="gift">🎁</div>
+  <div style="margin-top: 15px;">
+    <p style="font-size: 0.85rem; opacity: 0.7;">لو مش عاوزة المفاجأة، جربي تدوسي هنا 😂👇</p>
+    <div class="btn-group">
+      <button id="runaway-btn" onmouseover="moveButton()" ontouchstart="moveButton()" onclick="changeText()">لا مش عايزة</button>
+    </div>
+  </div>
+</div>
+
+<div class="stage hidden" id="s2">
+  <h1 id="t2"></h1>
+  <div class="card">
+    <div id="letter"></div>
+    <div class="sign" id="sign"></div>
+  </div>
+  <button id="next" class="hidden">كمّلي 💌</button>
+</div>
+
+<div class="stage hidden" id="s3">
+  <h1>اطلبي أمنية ✨</h1>
+  <div id="cakebox">
+    <div class="candles" id="candles"></div>
+    <div class="cake">🎂</div>
+  </div>
+  <button id="blow">انفخي الشمع 💨</button>
+  <div class="card reasons hidden" id="rsn"><h2 style="margin-bottom:8px; font-size: 1.3rem;">ليه بحبك؟ 💖</h2><ul id="list"></ul></div>
+</div>
+
+<script>
+const CFG = {
+    "name": "حببتي ندي",
+    "from": "عبد الرحمن",
+    "age": 18,
+    "letter": "كل سنة وإنتي حبيبتي يا أجمل حاجة حصلتلي في حياتي ❤️\n\nكل عام وانتي اجمل انسانه واحن واحلا انسانه شفتها في حياتي كل سنه وانتي معايا كل سنه وانتي احن وأطيب قلب عليا .\n\nكل سنه وانتي منوره حياتي وانتي احلي واجمل حد في دنيتي",
+    "reasons": [
+            " اطيب واحن قلب عليا ",
+            
+
+        "ضحكتك بتنوّر حياتي ✨",
+        "بحبك وبحب كل حاجه فيكي 💖",
+        "وعينيك خمر بلا كؤوس تسكر ماكنت اؤمن بالعيون وفعلها 👀",
+        "حتي دهتني في الهوى عيناكي سود لؤلؤتاها تشع نوا كقمر فوق ليلي يعتلي 🌙"
+    ]
+};
+
+const $ = id => document.getElementById(id);
+$('t1').textContent = 'عيد ميلاد سعيد يا ' + CFG.name + ' 🎉';
+$('t2').textContent = CFG.name ? 'كل سنة وإنتي ' + CFG.name + ' 🌹' : 'كل سنة وإنتي طيبة 🌹';
+$('sign').textContent = '— ' + CFG.from + ' 💕';
+
+// جمل ذكية ومتغيرة للزرار المجنون لو حاولت تدوسه
+const texts = [
+    "لا مش عايزة 😜",
+    "متأكدة يا ندي؟ 🤨",
+    "حرام عليكي ده انا تعبان فيه! 🥺",
+    "فكري تاني كده؟ 🤔",
+    "عيب ده أنا عبد الرحمن برضه! ❤️",
+    "لا مفيش فرار، دوسی هدية يلا 🎁"
+];
+let textIndex = 0;
+function moveButton() {
+    const btn = $('runaway-btn');
+    const x = Math.random() * 240 - 120;
+    const y = Math.random() * 120 - 60;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+}
+function changeText() {
+    textIndex = (textIndex + 1) % texts.length;
+    $('runaway-btn').textContent = texts[textIndex];
+    moveButton();
+}
+
+const c = $('fx'), x = c.getContext('2d');
+function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+let parts = [], auto = false;
+function boom(px, py, n = 90){
+  const hue = Math.random() * 360;
+  for(let i = 0; i < n; i++){
+    const a = Math.random() * Math.PI * 2, s = Math.random() * 6 + 1;
+    parts.push({x:px, y:py, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:1, hue:hue + Math.random()*40});
+  }
+}
+function confetti(){
+  for(let i = 0; i < 150; i++){
+    parts.push({x:window.innerWidth/2, y:window.innerHeight*.6, vx:(Math.random()-.5)*18, vy:-Math.random()*15-4,
+      life:1.6, hue:Math.random()*360, big:true});
+  }
+}
+function loop(){
+  x.globalCompositeOperation = 'destination-out';
+  x.fillStyle = 'rgba(0,0,0,.2)'; x.fillRect(0, 0, c.width, c.height);
+  x.globalCompositeOperation = 'lighter';
+  parts = parts.filter(p => p.life > 0);
+  for(const p of parts){
+    p.x += p.vx; p.y += p.vy; p.vy += .06; p.vx *= .985; p.life -= .012;
+    x.fillStyle = `hsla(${p.hue},100%,60%,${Math.min(p.life,1)})`;
+    x.beginPath();
+    if(p.big) x.fillRect(p.x, p.y, 7, 4); else x.arc(p.x, p.y, 2.4, 0, 7);
+    x.fill();
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+setInterval(() => { if(auto) boom(Math.random()*window.innerWidth, Math.random()*window.innerHeight*.55) }, 700);
+
+// تفاعل باللمس والماوس لإطلاق قلوب فورية
+window.addEventListener('pointerdown', e => {
+  boom(e.clientX, e.clientY, 30);
+});
+
+setInterval(() => {
+  const h = document.createElement('div');
+  h.className = 'heart';
+  h.textContent = ['💖','💗','💕','❤️','✨','🌸','🌟'][Math.floor(Math.random()*7)];
+  h.style.left = Math.random()*100 + 'vw';
+  h.style.fontSize = (16 + Math.random()*28) + 'px';
+  h.style.animationDuration = (5 + Math.random()*5) + 's';
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 10000);
+}, 300);
+
+$('gift').onclick = () => {
+  var music = document.getElementById('bg-music');
+  if(music) { music.play().catch(e => {}); }
+
+  $('s1').classList.add('hidden'); $('s2').classList.remove('hidden');
+  auto = true;
+  for(let i = 0; i < 5; i++) setTimeout(() => boom(Math.random()*window.innerWidth, Math.random()*window.innerHeight*.5, 120), i*250);
+  let i = 0; const txt = CFG.letter;
+  const iv = setInterval(() => {
+    $('letter').textContent += txt[i++];
+    if(i >= txt.length){ clearInterval(iv); $('next').classList.remove('hidden'); }
+  }, 45);
+};
+
+$('next').onclick = () => {
+  $('s2').classList.add('hidden'); $('s3').classList.remove('hidden');
+  $('candles').innerHTML = '<div class="candle"><div class="flame"></div></div>'.repeat(5);
+};
+
+$('blow').onclick = () => {
+  $('cakebox').classList.add('out'); $('blow').classList.add('hidden');
+  confetti(); setTimeout(confetti, 400);
+  for(let i = 0; i < 6; i++) setTimeout(() => boom(Math.random()*window.innerWidth, Math.random()*window.innerHeight*.5, 140), i*300);
+  $('rsn').classList.remove('hidden');
+  CFG.reasons.forEach((r, i) => {
+    const li = document.createElement('li'); li.textContent = '💝 ' + r; $('list').appendChild(li);
+    setTimeout(() => li.classList.add('show'), 600 + i*900);
+  });
+};
+</script>
+</body>
+</html>
